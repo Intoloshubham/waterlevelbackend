@@ -6,5 +6,6 @@ export const {
     APP_URL,
     WS_PORT,
     DATABASE_URL,
+    DEBUG_MODE,
     
 } = process.env

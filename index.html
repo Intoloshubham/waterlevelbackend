@@ -1,25 +1,25 @@
 <html>
     <head>
-        <title>Client 2</title>
+        <title>Client</title>
     </head>
     <body>
-        <!-- <img style="display: block;-webkit-user-select: none;margin: auto;background-color: hsl(0, 0%, 25%);" src="http://192.168.0.131/" width="479" height="359"> -->
-        <!-- <img src="" height="300px" width="400px" style="border: 3px solid gray" /> -->
+        <h1> Testing </h1>
         <img src="" height="300px" width="400px" style="border: 3px solid gray" />
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.2/socket.io.js" integrity="sha512-VJ6+sp2E5rFQk05caiXXzQd1wBABpjEj1r5kMiLmGAAgwPItw1YpqsCCBtq8Yr1x6C49/mTpRdXtq8O2RcZhlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.2/socket.io.js" integrity="sha512-VJ6+sp2E5rFQk05caiXXzQd1wBABpjEj1r5kMiLmGAAgwPItw1YpqsCCBtq8Yr1x6C49/mTpRdXtq8O2RcZhlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
         <script>
-            const img = document.querySelector('img');
-            const WS_URL = 'ws:///192.168.0.99:8888';
+            // const img = document.querySelector('img');
+            // const WS_URL = 'ws:///192.168.0.99:8888';
 
-            const ws = new WebSocket(WS_URL);
-            ws.addEventListener('open', ()=>{
-                console.log("we are connected");
-                ws.send('hi this msg send from client side')
-            });
+            // const ws = new WebSocket(WS_URL);
+            // ws.addEventListener('open', ()=>{
+            //     console.log("we are connected");
+            //     ws.send('hi this msg send from client side')
+            // });
 
-            ws.addEventListener('message', ({data})=>{
-                console.log(data);
-            });
+            // ws.addEventListener('message', ({data})=>{
+            //     console.log(data);
+            // });
+            //-----------------
 
             // const socket = io.connect('http://localhost:1935');
             // socket.on('image', (data)=>{
