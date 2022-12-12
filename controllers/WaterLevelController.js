@@ -82,6 +82,24 @@ const WaterLevelController = {
         return res.json({status:200, data:documents});
     },
 
+    async prevWaterLevel(req, res, next){
+
+        let documents;
+        let prevLevel;
+        try {
+            documents = await WaterLevel.findOne({unique_id:req.params.unique_id}).select('-__v');
+            setTimeout(() => {
+                prevLevel=parseFloat(documents.water_level);
+                return res.json({status:200, prevLevel});
+            }, 120000);
+
+        } catch (err) {
+            return next(CustomErrorHandler.serverError());
+        }
+        
+    },
+
+
     async updateWaterLevel(req, res, next){
         // const water_level_id = await getWaterLevelId(req.params.unique_id);
         const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);

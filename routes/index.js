@@ -18,6 +18,7 @@ router.get('/sump-status/:unique_id', WaterLevelController.getSumpStatus);
 router.put('/sump-status/:unique_id', WaterLevelController.updateSumpStatus);
 
 router.get('/water-level/:unique_id', WaterLevelController.getWaterLevel);
+router.get('/prev-water-level/:unique_id', WaterLevelController.prevWaterLevel);
 router.put('/water-level/:unique_id', WaterLevelController.updateWaterLevel);
 
 router.get('/water-level-image/:unique_id', WaterLevelController.getWaterLevelImage);
