@@ -9,6 +9,7 @@ import {
 
 // user
 router.post('/user-register', UserController.userRegister);
+router.post('/login-user', UserController.loginUser);
 
 ///water level
 router.get('/led-status/:unique_id', WaterLevelController.getLedStatus);
