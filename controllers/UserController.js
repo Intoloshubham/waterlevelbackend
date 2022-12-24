@@ -8,6 +8,7 @@ import transporter from "../config/emailConfig.js";
 import { EMAIL_FROM } from "../config/index.js";
 
 const UserController = {
+
   async userRegister(req, res, next) {
     const { error } = userSchema.validate(req.body);
     if (error) {
@@ -21,7 +22,7 @@ const UserController = {
       });
       if (mobile_exist) {
         return next(
-          CustomErrorHandler.alreadyExist("Mobile no is already exist")
+          CustomErrorHandler.alreadyExist({status:101,  msg:"Mobile no is already exist"})
         );
       }
 
@@ -29,8 +30,9 @@ const UserController = {
         locale: "en",
         strength: 1,
       });
+      
       if (email_exist) {
-        return next(CustomErrorHandler.alreadyExist("Email is already exist"));
+        return next(CustomErrorHandler.alreadyExist({status:102,  msg:"Email already exist"}));
       }
     } catch (err) {
       return next(err);
@@ -43,7 +45,7 @@ const UserController = {
       name,
       mobile,
       email,
-      password: hashedPassword,
+      password: hashedPassword
     });
 
     try {
@@ -52,7 +54,7 @@ const UserController = {
         from: EMAIL_FROM,
         to: email,
         subject: "Login password ",
-        text: " Password  " + password,
+        text: " Password  " + password
       });
     } catch (err) {
       return next(err);
@@ -61,16 +63,21 @@ const UserController = {
   },
 
   async loginUser(req, res, next) {
+
     const { mobile, password } = req.body;
+
     const user_detail = await User.findOne({ mobile });
+
     if (!user_detail) {
       return next(CustomErrorHandler.wrongCredentials());
     }
+
     const match = await bcrypt.compare(password, user_detail.password);
 
     if (!match) {
       return next(CustomErrorHandler.wrongCredentials());
     }
+    
     res.json({ status: 200, data: user_detail });
   },
 };

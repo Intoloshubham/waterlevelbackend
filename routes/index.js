@@ -5,6 +5,7 @@ import {
     WaterLevelController,
     WaterSettingController,
     UserController,
+    ProductController,
 } from '../controllers/index.js';
 
 // user
@@ -30,6 +31,8 @@ router.put('/water-level-setting/:unique_id', WaterSettingController.setWaterSet
 
 // router.get('/pump-notification-setting/:unique_id', WaterSettingController.getWaterSetting);
 router.put('/motor-notification-setting/:unique_id', WaterSettingController.setMotorNotificationSetting);
+
+router.post('/add-product',ProductController.store);
 
 router.put('/tank-height-setting/:unique_id', WaterSettingController.tankHeightSetting);
 router.put('/water-source-setting/:unique_id', WaterSettingController.waterSourceSetting);
