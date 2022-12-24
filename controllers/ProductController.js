@@ -7,7 +7,7 @@ const ProductController = {
   async index(req, res, next) {
     let documents;
     try {
-      documents = await Product.find().select('product_id -_id');;
+      documents = await Product.find().select('product_id -_id');
     } catch (error) {
       return next(CustomErrorHandler.serverError());
     }
