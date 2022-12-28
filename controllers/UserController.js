@@ -6,9 +6,13 @@ import CustomFunction from "../services/CustomFunction.js";
 import bcrypt from "bcrypt";
 import transporter from "../config/emailConfig.js";
 import { EMAIL_FROM } from "../config/index.js";
+import RefreshToken from "../models/auth/RefreshToken.js";
+import Joi from "joi";
+import JwtService from "../services/JwtService.js";
+import {JWT_SECRET,REFRESH_SECRET} from '../config/index.js'
 
 const UserController = {
-
+  
   async userRegister(req, res, next) {
     const { error } = userSchema.validate(req.body);
     if (error) {
@@ -22,7 +26,10 @@ const UserController = {
       });
       if (mobile_exist) {
         return next(
-          CustomErrorHandler.alreadyExist({status:101,  msg:"Mobile no is already exist"})
+          CustomErrorHandler.alreadyExist({
+            status: 101,
+            msg: "Mobile no is already exist",
+          })
         );
       }
 
@@ -30,9 +37,14 @@ const UserController = {
         locale: "en",
         strength: 1,
       });
-      
+
       if (email_exist) {
-        return next(CustomErrorHandler.alreadyExist({status:102,  msg:"Email already exist"}));
+        return next(
+          CustomErrorHandler.alreadyExist({
+            status: 102,
+            msg: "Email already exist",
+          })
+        );
       }
     } catch (err) {
       return next(err);
@@ -45,7 +57,7 @@ const UserController = {
       name,
       mobile,
       email,
-      password: hashedPassword
+      password: hashedPassword,
     });
 
     try {
@@ -54,7 +66,7 @@ const UserController = {
         from: EMAIL_FROM,
         to: email,
         subject: "Login password ",
-        text: " Password  " + password
+        text: " Password  " + password,
       });
     } catch (err) {
       return next(err);
@@ -68,6 +80,7 @@ const UserController = {
 
     const user_detail = await User.findOne({ mobile });
 
+
     if (!user_detail) {
       return next(CustomErrorHandler.wrongCredentials());
     }
@@ -77,8 +90,37 @@ const UserController = {
     if (!match) {
       return next(CustomErrorHandler.wrongCredentials());
     }
-    
-    res.json({ status: 200, data: user_detail });
+
+    const access_token = JwtService.sign({ _id: user_detail._id });
+    const refresh_token = JwtService.sign(
+      {
+        _id: user_detail._id,
+      },
+      "1y",
+      REFRESH_SECRET
+    );
+    await RefreshToken.create({ token: refresh_token });
+
+    res.json({ status: 200, access_token, refresh_token, data: user_detail });
+  },
+
+  async logoutUser(req, res, next) {
+
+    const refreshSchem=Joi.object({
+      refresh_token:Joi.string().required()
+    });
+
+    const {error} = refreshSchem.validate(req.body);
+    if (error) {
+      return next(error);
+    }
+    const {refresh_token} =req.body;
+    try {
+      await RefreshToken.deleteOne({token:refresh_token});
+    } catch (error) {
+      return next(new Error("Something went wrong in the database"));
+    }
+    res.json({status:200,data:"Logout Successfully!"})
   },
 };
 

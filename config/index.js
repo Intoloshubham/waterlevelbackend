@@ -11,5 +11,7 @@ export const {
   EMAIL_PORT,
   EMAIL_USER,
   EMAIL_PASSWORD,
+  REFRESH_SECRET,
+  JWT_SECRET, 
   EMAIL_FROM
 } = process.env;

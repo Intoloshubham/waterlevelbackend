@@ -1,4 +1,5 @@
 import express from "express";
+import { DeviceController } from "../controllers/device/index.js";
 const router = express.Router();
 
 import {
@@ -11,6 +12,7 @@ import {
 // user
 router.post('/user-register', UserController.userRegister);
 router.post('/login-user', UserController.loginUser);
+router.delete('/logout-user',UserController.logoutUser);
 
 ///water level
 router.get('/led-status/:unique_id', WaterLevelController.getLedStatus);
@@ -32,7 +34,13 @@ router.put('/water-level-setting/:unique_id', WaterSettingController.setWaterSet
 // router.get('/pump-notification-setting/:unique_id', WaterSettingController.getWaterSetting);
 router.put('/motor-notification-setting/:unique_id', WaterSettingController.setMotorNotificationSetting);
 
+//product list
 router.post('/add-product',ProductController.store);
+router.get('/get-product/:id',ProductController.index);
+router.put('/product/:id',ProductController.update);
+
+router.post('/device-key-generate',DeviceController.store);
+router.put('/device-key/:id',DeviceController.update);
 
 router.put('/tank-height-setting/:unique_id', WaterSettingController.tankHeightSetting);
 router.put('/water-source-setting/:unique_id', WaterSettingController.waterSourceSetting);
