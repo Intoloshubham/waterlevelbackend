@@ -29,7 +29,7 @@ router.get('/water-level-image/:unique_id', WaterLevelController.getWaterLevelIm
 router.post('/water-level-image/:unique_id', WaterLevelController.saveWaterLevelImage);
 
 router.get('/water-level-setting/:unique_id', WaterSettingController.getWaterSetting);
-router.put('/water-level-setting/:unique_id', WaterSettingController.setWaterSetting);
+router.put('/update-water-level-setting/:unique_id', WaterSettingController.setWaterSetting);
 
 // router.get('/pump-notification-setting/:unique_id', WaterSettingController.getWaterSetting);
 router.put('/motor-notification-setting/:unique_id', WaterSettingController.setMotorNotificationSetting);

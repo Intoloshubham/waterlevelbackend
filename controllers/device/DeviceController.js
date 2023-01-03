@@ -4,7 +4,6 @@ import CustomFunction from "../../services/CustomFunction.js";
 import CustomSuccessHandler from "../../services/CustomSuccessHandler.js";
 
 const DeviceController = {
-
   async index(req, res, next) {
     let documents;
     try {
@@ -20,11 +19,23 @@ const DeviceController = {
 
     var temp;
     var resp;
+    let mon;
+    let yr;
+    let num;
 
-    let water_device_name = "water_level_0";
+    yr = new Date().getFullYear().toString().slice(-2);
+    num = CustomFunction.randomNumber();
+    let d = new Date();
+    let mont = d.getMonth();
+    if (mont == 0) {
+      mon = "0" + (++mont).toString();
+      console.log(mon);
+    } else {
+      mon = mont;
+    }
+
     for (let index = 0; index < device_key_count; index++) {
-      var timestamp = new Date().getTime();
-      temp = water_device_name + timestamp;
+      temp = mon + yr + "INTE" + num + "NICS" + "10";
       const deviceScehma = new Device({
         // device_key_count,
         // water_device_name,
@@ -41,7 +52,7 @@ const DeviceController = {
       });
     }
   },
-  
+
   async update(req, res, next) {
     let documents;
     try {
