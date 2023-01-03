@@ -95,6 +95,8 @@ const CustomFunction  = {
         return str.charAt(0).toUpperCase() + str.slice(1);
         // return str[0].toUpperCase() + str.slice(1);
     }
+ 
+
 
     // #!/bin/sh
     // git --work-tree=/var/www/intolo/consoftpro --git-dir=/var/repo/consoftpro.git checkout -f
