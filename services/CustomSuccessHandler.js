@@ -12,6 +12,9 @@ class CustomSuccessHandler {
     static dataNotFound(message){
         return new CustomSuccessHandler(200, message)
     }
+    static customMessage(message){
+        return new CustomSuccessHandler(210, message)
+    }
 
     // static notVerify(message){
     //     return new CustomSuccessHandler(301, message)

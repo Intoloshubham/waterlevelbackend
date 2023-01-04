@@ -7,6 +7,7 @@ import {
     WaterSettingController,
     UserController,
     ProductController,
+    ForgetPasswordController
 } from '../controllers/index.js';
 
 // user
@@ -45,6 +46,11 @@ router.put('/device-key/:id',DeviceController.update);
 
 router.put('/tank-height-setting/:unique_id', WaterSettingController.tankHeightSetting);
 router.put('/water-source-setting/:unique_id', WaterSettingController.waterSourceSetting);
+
+//forgetPassword
+router.post('/forget-password',ForgetPasswordController.forgetPassword);
+router.put('/verify-otp/:user_id',ForgetPasswordController.verifyOtp);
+router.put('/reset-password/:user_id',ForgetPasswordController.resetPassword);
 
 
 export default router;
