@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const deviceSchema = mongoose.Schema({
-  // water_device_name: { type: String, required: true },
+  version: { type: String },
   device_key: { type: String, required: true },
   device_key_count: { type: Number },
   status:{type:Boolean,default:false}
