@@ -15,7 +15,7 @@ const DeviceController = {
   },
 
   async store(req, res, next) {
-    const { device_key_count } = req.body;
+    const { device_key_count, version } = req.body;
 
     var temp;
     var resp;
@@ -23,26 +23,31 @@ const DeviceController = {
     let yr;
     let num;
 
-    yr = new Date().getFullYear().toString().slice(-2);
-    num = CustomFunction.randomNumber();
-    let d = new Date();
-    let mont = d.getMonth();
-    if (mont == 0) {
-      mon = "0" + (++mont).toString();
-      console.log(mon);
-    } else {
-      mon = mont;
-    }
+    try {
+      yr = new Date().getFullYear().toString().slice(-2);
 
-    for (let index = 0; index < device_key_count; index++) {
-      temp = mon + yr + "INTE" + num + "NICS" + "10";
-      const deviceScehma = new Device({
-        // device_key_count,
-        // water_device_name,
-        device_key: temp,
-      });
+      let d = new Date();
 
-      resp = await deviceScehma.save();
+      let mont = d.getMonth();
+      if (mont == 0) {
+        mon = "0" + (++mont).toString();
+      } else {
+        mon = mont;
+      }
+
+      for (let index = 0; index < device_key_count; index++) {
+        num = CustomFunction.randomNumber();
+        temp = mon + yr + "INTE" + num + "NICS" + version;
+        const deviceScehma = new Device({
+          // device_key_count,
+          // water_device_name,
+          device_key: temp,
+        });
+
+        resp = await deviceScehma.save();
+      }
+    } catch (error) {
+      return next(CustomErrorHandler.serverError());
     }
 
     if (resp) {

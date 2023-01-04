@@ -9,10 +9,9 @@ import { EMAIL_FROM } from "../config/index.js";
 import RefreshToken from "../models/auth/RefreshToken.js";
 import Joi from "joi";
 import JwtService from "../services/JwtService.js";
-import {JWT_SECRET,REFRESH_SECRET} from '../config/index.js'
+import { JWT_SECRET, REFRESH_SECRET } from "../config/index.js";
 
 const UserController = {
-  
   async userRegister(req, res, next) {
     const { error } = userSchema.validate(req.body);
     if (error) {
@@ -76,51 +75,68 @@ const UserController = {
 
   async loginUser(req, res, next) {
 
+
     const { mobile, password } = req.body;
 
-    const user_detail = await User.findOne({ mobile });
+    let access_token;
+    let refresh_token;
+    let user_detail;
 
-
-    if (!user_detail) {
-      return next(CustomErrorHandler.wrongCredentials());
+    try {
+      user_detail = await User.findOne({ mobile });
+  
+      if (!user_detail) {
+        return next(CustomErrorHandler.wrongCredentials());
+      }
+      
+    } catch (error) {
+      return next(CustomErrorHandler.serverError());
     }
 
-    const match = await bcrypt.compare(password, user_detail.password);
-
-    if (!match) {
-      return next(CustomErrorHandler.wrongCredentials());
+    try {
+      const match = await bcrypt.compare(password, user_detail.password);
+  
+      if (!match) {
+        return next(CustomErrorHandler.wrongCredentials());
+      }      
+    } catch (error) {
+      return next(CustomErrorHandler.serverError());
     }
 
-    const access_token = JwtService.sign({ _id: user_detail._id });
-    const refresh_token = JwtService.sign(
-      {
-        _id: user_detail._id,
-      },
-      "1y",
-      REFRESH_SECRET
-    );
-    await RefreshToken.create({ token: refresh_token });
+    try {
+
+      access_token = JwtService.sign({ _id: user_detail._id });
+      refresh_token = JwtService.sign(
+        {
+          _id: user_detail._id,
+        },
+        "1y",
+        REFRESH_SECRET
+      );
+      await RefreshToken.create({ token: refresh_token });
+    } catch (error) {
+      return next(CustomErrorHandler.serverError());
+    }
 
     res.json({ status: 200, access_token, refresh_token, data: user_detail });
   },
 
   async logoutUser(req, res, next) {
-
-    const refreshSchem=Joi.object({
-      refresh_token:Joi.string().required()
+    const refreshSchem = Joi.object({
+      refresh_token: Joi.string().required(),
     });
 
-    const {error} = refreshSchem.validate(req.body);
+    const { error } = refreshSchem.validate(req.body);
     if (error) {
       return next(error);
     }
-    const {refresh_token} =req.body;
+    const { refresh_token } = req.body;
     try {
-      await RefreshToken.deleteOne({token:refresh_token});
+      await RefreshToken.deleteOne({ token: refresh_token });
     } catch (error) {
       return next(new Error("Something went wrong in the database"));
     }
-    res.json({status:200,data:"Logout Successfully!"})
+    res.json({ status: 200, data: "Logout Successfully!" });
   },
 };
 

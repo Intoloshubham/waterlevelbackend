@@ -19,9 +19,9 @@ const ProductController = {
   async store(req, res, next) {
     try {
       const { service_used_in, product_id, user_id } = req.body;
-      
-      const existing_cust_id = await Device.exists({
-        _id: product_id,
+
+      const existing_cust_id = await Device.find({
+        device_key: product_id,
       }).collation({ locale: "en", strength: 1 });
 
       if (existing_cust_id) {
