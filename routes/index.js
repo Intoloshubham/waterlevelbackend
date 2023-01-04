@@ -39,7 +39,7 @@ router.put('/motor-notification-setting/:unique_id', WaterSettingController.setM
 router.post('/add-product',ProductController.store);
 router.get('/get-product/:id',ProductController.index);
 router.put('/product/:id',ProductController.update);
-router.put('/primary/:id',ProductController.primaryStatus);
+router.put('/primary/:id',ProductController.productKeyActivate);
 
 router.post('/device-key-generate',DeviceController.store);
 router.put('/device-key/:id',DeviceController.update);
