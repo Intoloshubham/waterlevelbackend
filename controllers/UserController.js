@@ -74,8 +74,6 @@ const UserController = {
   },
 
   async loginUser(req, res, next) {
-
-
     const { mobile, password } = req.body;
 
     let access_token;
@@ -84,27 +82,25 @@ const UserController = {
 
     try {
       user_detail = await User.findOne({ mobile });
-  
+
       if (!user_detail) {
         return next(CustomErrorHandler.wrongCredentials());
       }
-      
     } catch (error) {
       return next(CustomErrorHandler.serverError());
     }
 
     try {
       const match = await bcrypt.compare(password, user_detail.password);
-  
+
       if (!match) {
         return next(CustomErrorHandler.wrongCredentials());
-      }      
+      }
     } catch (error) {
       return next(CustomErrorHandler.serverError());
     }
 
     try {
-
       access_token = JwtService.sign({ _id: user_detail._id });
       refresh_token = JwtService.sign(
         {
@@ -122,6 +118,7 @@ const UserController = {
   },
 
   async logoutUser(req, res, next) {
+    
     const refreshSchem = Joi.object({
       refresh_token: Joi.string().required(),
     });
@@ -137,6 +134,16 @@ const UserController = {
       return next(new Error("Something went wrong in the database"));
     }
     res.json({ status: 200, data: "Logout Successfully!" });
+  },
+  async checkTokenExist(req, res, next) {
+    let temp;
+    try {
+      const { access_token, refresh_token } = req.body;
+      temp = await RefreshToken.exists({ token: refresh_token });
+    } catch (error) {
+      return next(CustomErrorHandler.serverError());
+    }
+    return res.send({ status: 200, data: temp });
   },
 };
 

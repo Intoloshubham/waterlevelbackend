@@ -14,6 +14,7 @@ import {
 router.post('/user-register', UserController.userRegister);
 router.post('/login-user', UserController.loginUser);
 router.delete('/logout-user',UserController.logoutUser);
+router.get('/check-token-exist',UserController.checkTokenExist);
 
 ///water level
 router.get('/led-status/:unique_id', WaterLevelController.getLedStatus);
