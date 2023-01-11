@@ -27,7 +27,7 @@
     "node-rtsp-stream-jsmpeg": "^0.0.2",
     "nodemailer": "^6.7.5",
     "path": "^0.12.7",
-    "socket.io": "^4.5.2",
+    "socket.io": "^4.5.4",
     "ws": "^7.5.9"
   },
   "devDependencies": {

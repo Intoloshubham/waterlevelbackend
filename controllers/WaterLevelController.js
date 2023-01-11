@@ -6,6 +6,9 @@ import CustomSuccessHandler from "../services/CustomSuccessHandler.js";
 import CustomFunction from "../services/CustomFunction.js";
 import helpers from "../helpers/index.js";
 
+
+
+
 const WaterLevelController = {
   async getLedStatus(req, res, next) {
     let documents;
@@ -81,6 +84,7 @@ const WaterLevelController = {
       documents = await WaterLevel.findOne({
         unique_id: req.params.unique_id,
       }).select("-__v");
+
     } catch (err) {
       return next(CustomErrorHandler.serverError());
     }
