@@ -8,5 +8,9 @@ export default {
   VERIFY: true,
   REVERT: true,
   CYLINDRICAL: "Cylindrical",
-  CUBOIDAL: "Cuboidal"
+  CUBOIDAL: "Cuboidal",
+    USES:'Uses',
+    LEAKAGE:'Leakage',
+    QUALITY:'Quality',
+    NEED_CLEANING:'NeedCleaning',
 };
