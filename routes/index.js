@@ -13,8 +13,13 @@ import {
 // user
 router.post('/user-register', UserController.userRegister);
 router.post('/login-user', UserController.loginUser);
+<<<<<<< HEAD
 router.delete('/logout-user', UserController.logoutUser);
 router.get('/check-token-exist', UserController.checkTokenExist);
+=======
+router.delete('/logout-user',UserController.logoutUser);
+router.get('/check-token-exist',UserController.checkTokenExist);
+>>>>>>> 56b33e07c8f4c09ff877beaa662aa4698987d3d6
 
 ///water level
 router.get('/led-status/:unique_id', WaterLevelController.getLedStatus);
@@ -48,10 +53,17 @@ router.put('/update-water-level-setting/:unique_id', WaterSettingController.setW
 router.put('/notification-setting/:unique_id', WaterSettingController.notificationSetting);
 
 //product list
+<<<<<<< HEAD
 router.post('/add-product', ProductController.store);
 router.get('/get-product/:id', ProductController.index);
 router.put('/product/:id', ProductController.update);
 router.put('/primary/:id', ProductController.productKeyActivate);
+=======
+router.post('/add-product',ProductController.store);
+router.get('/get-product/:id',ProductController.index);
+router.put('/product/:id',ProductController.update);
+router.put('/primary/:id',ProductController.productKeyActivate);
+>>>>>>> 56b33e07c8f4c09ff877beaa662aa4698987d3d6
 
 router.post('/device-key-generate',DeviceController.store);
 router.put('/device-key/:id',DeviceController.update);
