@@ -6,19 +6,31 @@ import CustomFunction from "../services/CustomFunction.js";
 import CustomSuccessHandler from "../services/CustomSuccessHandler.js";
 
 const ProductController = {
-  async index(req, res, next) {
-    let documents;
-    try {
-      documents = await Product.find({ user_id: req.params.id });
-    } catch (error) {
-      return next(CustomErrorHandler.serverError());
-    }
-    return res.json({ status: 200, data: documents });
-  },
+    async index(req, res, next) {
+      let documents;
+      try {
+          documents = await Product.find({ user_id: ObjectId(req.params.id) });
+      } catch (error) {
+          return next(CustomErrorHandler.serverError());
+      }
+      return res.json({ status: 200, data: documents });
+    },
 
   async store(req, res, next) {
     try {
       const { service_used_in, product_id, user_id } = req.body;
+
+      const exist_active = await Device.find({
+        $and: [{device_key: product_id }, { status: true }],
+      });
+
+      if (exist_active.length<1) {
+        return next(
+          CustomErrorHandler.alreadyExist({
+            msg: "Invalid Product Id!",
+          })
+        );
+      }
 
       const existing_cust_id = await Device.find({
         device_key: product_id,
@@ -40,6 +52,7 @@ const ProductController = {
           );
         }
         const exist = await Product.exists({
+          user_id,
           service_used_in: service_used_in,
         }).collation({
           locale: "en",
@@ -87,7 +100,7 @@ const ProductController = {
     res.json({ status: 200, data: "Product details updated successfully" });
   },
 
-  async primaryStatus(req, res, next) {
+  async productKeyActivate(req, res, next) {
     // const { status } = req.body;
     try {
       const exist = await Product.updateMany(
@@ -105,11 +118,16 @@ const ProductController = {
         }
       );
 
-
-      res.json({ status: 200, data: "Product is set to Primary!" ,product_id:temp.product_id,label:temp.service_used_in});
+      res.json({
+        status: 200,
+        data: "Product is set to Primary!",
+        product_id: temp.product_id,
+        label: temp.service_used_in,
+      });
     } catch (error) {
       return next(CustomErrorHandler.serverError(error));
     }
   },
 };
+
 export default ProductController;

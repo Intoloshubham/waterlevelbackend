@@ -2,6 +2,7 @@ import { WaterSetting, WaterLevel } from "../models/index.js";
 import CustomErrorHandler from "../services/CustomErrorHandler.js";
 import CustomSuccessHandler from "../services/CustomSuccessHandler.js";
 import helpers from "../helpers/index.js";
+import Constants from "../constants/index.js";
 
 const WaterSettingController = {
 
@@ -55,23 +56,62 @@ const WaterSettingController = {
         return res.send(CustomSuccessHandler.success('Water level min and max percentage updated successfully'));
     },
 
-    async setMotorNotificationSetting(req, res, next){
+    // async setMotorNotificationSetting(req, res, next){
+    async notificationSetting(req, res, next){
         // const water_level_id = await getWaterLevelId(req.params.unique_id);
+        
         const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
-        const { motor_notification } = req.body;
+        const { notification_type, status } = req.body;
         try {
             const filter = { water_level_id: water_level_id};
             const options = { upsert: true };
-            const updateDoc = {
-                $set: {
-                    motor_notification
-                }
-            };
+            let updateDoc;
+            if (notification_type == Constants.USES) {
+                updateDoc = {
+                    $set: {
+                        uses_notification:status    
+                    }
+                };
+            }else if (notification_type == Constants.LEAKAGE) {
+                updateDoc = {
+                    $set: {
+                        leakage_notification:status    
+                    }
+                };
+            }else if (notification_type == Constants.QUALITY) {
+                updateDoc = {
+                    $set: {
+                        quality_notification:status    
+                    }
+                };
+            }else if (notification_type == Constants.NEED_CLEANING) {
+                updateDoc = {
+                    $set: {
+                        need_cleaning_notification:status    
+                    }
+                };
+            }
+
             const result = await WaterSetting.updateOne(filter, updateDoc, options);
         } catch (err) {
             return next(err);
         }
-        return res.send(CustomSuccessHandler.success('Motor notification updated successfully'));
+        return res.send(CustomSuccessHandler.success('Notification updated successfully'));
+        // const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
+        // const { motor_notification } = req.body;
+        // try {
+        //     const filter = { water_level_id: water_level_id};
+        //     const options = { upsert: true };
+        //     const updateDoc = {
+        //         $set: {
+        //             motor_notification
+        //         }
+        //     };
+        //     const result = await WaterSetting.updateOne(filter, updateDoc, options);
+        // } catch (err) {
+        //     return next(err);
+        // }
+        // return res.send(CustomSuccessHandler.success('Motor notification updated successfully'));
     },
 
     async tankHeightSetting(req, res, next){
@@ -114,7 +154,10 @@ const WaterSettingController = {
             return next(err);
         }
         return res.send(CustomSuccessHandler.success('Water source updated successfully'));
-    }
+    },
+
+    
+
 }
 
 // async function getWaterLevelId(unique_id){

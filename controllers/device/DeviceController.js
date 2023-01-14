@@ -78,5 +78,4 @@ const DeviceController = {
     return res.json({ status: 200, data: documents });
   },
 };
-
 export default DeviceController;
