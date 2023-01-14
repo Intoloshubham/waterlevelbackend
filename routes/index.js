@@ -7,7 +7,8 @@ import {
     WaterSettingController,
     UserController,
     ProductController,
-    ForgetPasswordController
+    ForgetPasswordController,
+    WaterUsesController
 } from '../controllers/index.js';
 
 // user
@@ -15,6 +16,9 @@ router.post('/user-register', UserController.userRegister);
 router.post('/login-user', UserController.loginUser);
 router.delete('/logout-user',UserController.logoutUser);
 router.get('/check-token-exist',UserController.checkTokenExist);
+
+//Water Uses 
+router.post('/water-uses',WaterUsesController.store);
 
 ///water level
 router.get('/led-status/:unique_id', WaterLevelController.getLedStatus);
@@ -52,6 +56,7 @@ router.put('/water-source-setting/:unique_id', WaterSettingController.waterSourc
 router.post('/forget-password',ForgetPasswordController.forgetPassword);
 router.put('/verify-otp/:user_id',ForgetPasswordController.verifyOtp);
 router.put('/reset-password/:user_id',ForgetPasswordController.resetPassword);
+
 
 
 export default router;

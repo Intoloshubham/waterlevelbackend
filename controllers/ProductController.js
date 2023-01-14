@@ -9,7 +9,7 @@ const ProductController = {
   async index(req, res, next) {
     let documents;
     try {
-      documents = await Product.find({ user_id: req.params.id });
+      documents = await Product.find({ user_id:ObjectId(req.params.id) });
     } catch (error) {
       return next(CustomErrorHandler.serverError());
     }
@@ -17,6 +17,8 @@ const ProductController = {
   },
 
   async store(req, res, next) {
+    let existing_cust_id;
+    let cust_id;
     try {
       const { service_used_in, product_id, user_id } = req.body;
 
@@ -32,7 +34,7 @@ const ProductController = {
         );
       }
 
-      const existing_cust_id = await Device.find({
+     existing_cust_id = await Device.find({
         device_key: product_id,
       }).collation({ locale: "en", strength: 1 });
 
@@ -66,7 +68,7 @@ const ProductController = {
             })
           );
         }
-
+        cust_id=product_id;
         const temp = new Product({
           product_id: product_id,
           service_used_in,
@@ -83,7 +85,7 @@ const ProductController = {
     } catch (error) {
       return next(error);
     }
-    res.json({ status: 200, data: "Product Details registered" });
+    res.json({ status: 200, data: "Product Details registered",product_id:cust_id });
   },
 
   async update(req, res, next) {
