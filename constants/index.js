@@ -1,5 +1,4 @@
 export default {
-  
   ADMINISTRATOR: "Administrator",
   EDITOR: "Editor",
   USER: "User",
@@ -9,8 +8,8 @@ export default {
   REVERT: true,
   CYLINDRICAL: "Cylindrical",
   CUBOIDAL: "Cuboidal",
-    USES:'Uses',
-    LEAKAGE:'Leakage',
-    QUALITY:'Quality',
-    NEED_CLEANING:'NeedCleaning',
+  USES: "Uses",
+  LEAKAGE: "Leakage",
+  QUALITY: "Quality",
+  NEED_CLEANING: "NeedCleaning",
 };
