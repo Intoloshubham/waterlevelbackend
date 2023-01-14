@@ -107,7 +107,7 @@ const WaterLevelController = {
     }
   },
 
-  async updateWaterLevel(req, res, next) {
+  async updateWaterLevel(req, res, next) { 
     // const water_level_id = await getWaterLevelId(req.params.unique_id);
     const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
     try {
