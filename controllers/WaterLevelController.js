@@ -112,14 +112,7 @@ async updateBoreStatus(req, res, next) {
 async getWaterLevel(req, res, next) {
     let documents;
     try {
-<<<<<<< HEAD
         documents = await WaterLevel.findOne({unique_id: req.params.unique_id}).select("-__v");
-=======
-      documents = await WaterLevel.findOne({
-        unique_id: req.params.unique_id,
-      }).select("-__v");
-
->>>>>>> 56b33e07c8f4c09ff877beaa662aa4698987d3d6
     } catch (err) {
         return next(CustomErrorHandler.serverError());
     }
@@ -142,7 +135,7 @@ async getWaterLevel(req, res, next) {
     }
   },
 
-  async updateWaterLevel(req, res, next) {
+  async updateWaterLevel(req, res, next) { 
     // const water_level_id = await getWaterLevelId(req.params.unique_id);
     const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
     try {
