@@ -6,7 +6,6 @@ import errorHandler from "./middlewares/errorHandler.js";
 import routes from "./routes/index.js";
 import path from "path";
 import cors from "cors";
-import { Server } from "socket.io";
 
 const app = express();
 
@@ -37,30 +36,11 @@ app.use("/uploads", express.static("uploads"));
 
 app.use(errorHandler);
 
-let server = app.listen(port, () => {
+ app.listen(port, () => {
   console.log(`Server listening at ${APP_URL}`);
 });
 
-const io = new Server(server,{
-  cors:{origin:'*'}
-});
-io.on("connection", (socket) => {
-  console.log("on connection", socket.id);
 
-  socket.on("join_room", (data) => {
-    console.log('data=',data)
-    socket.join(data);
-  });
-
-  socket.on('send_message',(data)=>{
-    socket.to(data.room).emit('receive_message','hidfd');
-  });
-
-  socket.on('disconnect',()=>{
-    console.log('user disconnected')
-  });
-
-});
 //-----------------------------------
 // WebSocket Here
 // import express from 'express'

@@ -1,7 +1,7 @@
 import CustomErrorHandler from "../services/CustomErrorHandler.js";
 import CustomSuccessHandler from "../services/CustomSuccessHandler.js";
 import { WaterUse } from "../models/index.js";
-import Constants  from "../constants/index.js";
+import Constants from "../constants/index.js";
 
 const WaterUsesController = {
   async index(req, res, next) {
@@ -21,21 +21,26 @@ const WaterUsesController = {
         tank_breadth,
         tank_diameter,
         tank_height,
+        unique_id
       } = req.body;
 
       switch (tank_shape) {
         case Constants.CYLINDRICAL:
-          const radi = tank_diameter / 2;
-          const cyl_vol = pie * radi * radi * tank_height;
+          const radius = tank_diameter / 2;
+          const cyl_vol = pie * radius * radius * tank_height;
+
           const temp_cylinder = new WaterUse({
+            unique_id,
             no_of_users,
             tank_shape,
             tank_height,
-            radi,
+            radius,
             cyl_volume: cyl_vol,
           });
-          const temp1 = await temp_cylinder.save();
+
+          await temp_cylinder.save();
           break;
+
         case Constants.CUBOIDAL:
           const cuboid_volume = tank_length * tank_breadth * tank_height;
           const temp_cuboid = new WaterUse({
@@ -46,8 +51,11 @@ const WaterUsesController = {
             tank_breadth,
             cuboid_volume,
           });
+
           const temp2 = await temp_cuboid.save();
+
           break;
+
         default:
           next(CustomErrorHandler.notFound("No Volume exist!"));
           break;

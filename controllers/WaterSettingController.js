@@ -115,8 +115,9 @@ const WaterSettingController = {
     },
 
     async tankHeightSetting(req, res, next){
-        // const water_level_id = await getWaterLevelId(req.params.unique_id);
+        
         const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
+   
         const { tank_height_type, tank_height, tank_height_unit } = req.body;
 
         try {
