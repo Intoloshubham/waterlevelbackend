@@ -34,6 +34,10 @@ class CustomErrorHandler extends Error{
         return new CustomErrorHandler(401, message)
     }
 
+    static idUndefined(message){
+        return new CustomErrorHandler(401, message)
+    }
+
     
 
     
