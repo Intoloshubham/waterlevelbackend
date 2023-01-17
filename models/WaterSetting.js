@@ -6,7 +6,7 @@ const waterSettingSchema = mongoose.Schema({
     start_level:{ type: Number, default:0 },
     stop_level:{ type: Number, default:0 },
     tank_height_type: { type:Boolean, default:false },
-    tank_height: { type:Number, default:0 },
+    tank_height: { type:Number, default:100 },
     tank_height_unit: { type:Number, default:0 },
     water_source_1: { type:Boolean, default:true },
     water_source_2: { type:Boolean, default:false },

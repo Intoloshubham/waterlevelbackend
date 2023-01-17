@@ -7,8 +7,13 @@ import routes from "./routes/index.js";
 import path from "path";
 import cors from "cors";
 import { Server } from "socket.io";
+import {socketConn,io} from "./utils/SocketService.js";
+import constants from "./constants/index.js";
+
+
 
 const app = express();
+
 
 // const port = process.env.PORT || '8000'
 // const DATABASE_URL = process.env.DATABASE_URL || "mongodb+srv://rohitnamdeo:rohitnamdeo123@cluster0.vkr7r.mongodb.net/consoft";
@@ -37,31 +42,38 @@ app.use("/uploads", express.static("uploads"));
 
 app.use(errorHandler);
 
-let server = app.listen(port, () => {
+ let server=app.listen(port, () => {
   console.log(`Server listening at ${APP_URL}`);
 });
+io.attach(server);
 
-const io = new Server(server,{
-  cors:{origin:'*'}
-});
-io.on("connection", (socket) => {
-  console.log("on connection", socket.id);
+// const io = new Server(server,{
+//   cors:{origin:'*'}
+// });
 
-  socket.on("join_room", (data) => {
-    console.log('data=',data)
-    socket.join(data);
-  });
+// io.on("connection", (socket) => {
+//   console.log("on connection", socket.id);
 
-  socket.on('send_message',(data)=>{
-    socket.to(data.room).emit('receive_message','hidfd');
-  });
+//   // socket.on("join_room", (data) => {
+//   //   console.log('data=', data)
+//   //   socket.join(data);
+//   // });
+//   // socket.on('polar',(data)=>{
+//   //   console.log('df',data)
+//   // })
+//   socket.emit('send_online_friend','i m from server  d');
+//   socket.emit('notify','i m from ser');  
+//   // socket.on('send_message',(data)=>{
+//     // socket.to(data.room).emit('receive_message','hidfd');
+//   // });
 
-  socket.on('disconnect',()=>{
-    console.log('user disconnected')
-  });
+//   socket.on('disconnect',()=>{
+//     console.log('user disconnected')
+//   });
 
-});
-//-----------------------------------
+// });
+
+//------------------------ -----------
 // WebSocket Here
 // import express from 'express'
 // import {PORT, APP_URL, WS_PORT, DATABASE_URL} from './config/index.js';

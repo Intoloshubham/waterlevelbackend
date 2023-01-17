@@ -4,6 +4,7 @@ import CustomSuccessHandler from "../services/CustomSuccessHandler.js";
 import helpers from "../helpers/index.js";
 import Constants from "../constants/index.js";
 
+
 const WaterSettingController = {
 
     async getWaterSetting(req, res, next){
@@ -72,6 +73,7 @@ const WaterSettingController = {
                         uses_notification:status    
                     }
                 };
+    
             }else if (notification_type == Constants.LEAKAGE) {
                 updateDoc = {
                     $set: {
@@ -115,8 +117,9 @@ const WaterSettingController = {
     },
 
     async tankHeightSetting(req, res, next){
-        // const water_level_id = await getWaterLevelId(req.params.unique_id);
+        
         const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
+   
         const { tank_height_type, tank_height, tank_height_unit } = req.body;
 
         try {
