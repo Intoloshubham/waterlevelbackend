@@ -6,15 +6,15 @@ import CustomFunction from "../services/CustomFunction.js";
 import CustomSuccessHandler from "../services/CustomSuccessHandler.js";
 
 const ProductController = {
-  async index(req, res, next) {
-    let documents;
-    try {
-      documents = await Product.find({ user_id:ObjectId(req.params.id) });
-    } catch (error) {
-      return next(CustomErrorHandler.serverError());
-    }
-    return res.json({ status: 200, data: documents });
-  },
+    async index(req, res, next) {
+      let documents;
+      try {
+          documents = await Product.find({ user_id: ObjectId(req.params.id) });
+      } catch (error) {
+          return next(CustomErrorHandler.serverError());
+      }
+      return res.json({ status: 200, data: documents });
+    },
 
   async store(req, res, next) {
     let existing_cust_id;

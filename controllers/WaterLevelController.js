@@ -40,18 +40,93 @@ async getBoreStatus(req, res, next) {
 
 //---------------------
 async updateMotorStatus(req, res, next){
-    const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
-    if (water_level_id) {
-      socketConn()
+
+    if (req.params.unique_id === 'undefined') {
+        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
     }
-    const { led_status } = req.body;
+    const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
+    const { sump_status, bore_status } = req.body;
+    let updateDoc;
+    let msg ;
+    try {
+        if ( sump_status || bore_status ) {
 
+            if (sump_status == true) {
+                const document = await WaterLevel.findById(water_level_id).select('sump_level');
+                if (document.sump_level < 35) {
+                    return next(CustomErrorHandler.inValid('Your sump level is ' + document.sump_level + '%. If you want to start sump minimum level is required above 35%.'));
+                }
+                updateDoc = {
+                    $set: {
+                        motor_status: true,
+                        sump_status: sump_status,
+                    },
+                };
+                msg = "Sump motor is on";
+            }else if (bore_status == true) {
+                updateDoc = {
+                    $set: {
+                        motor_status: true,
+                        bore_status: bore_status,
+                    },
+                };
+                msg = "Bore motor is on";
+            }
+            
+        }else{
+            const document = await WaterLevel.findById(water_level_id).select('sump_status bore_status');
+            if (sump_status == false) {
+                if (document.bore_status == true) {
+                    updateDoc = {
+                        $set: {
+                            sump_status: sump_status,
+                        },
+                    };
+                }else{
+                    updateDoc = {
+                        $set: {
+                            motor_status: false,
+                            sump_status: sump_status,
+                        },
+                    };
+                }
+                msg = "Sump motor is off";
+            }else if (bore_status == false) {
+                if (document.sump_status == true) {
+                    updateDoc = {
+                        $set: {
+                            bore_status: bore_status,
+                        },
+                    };
+                }else{
+                    updateDoc = {
+                        $set: {
+                            motor_status: false,
+                            bore_status: bore_status,
+                        },
+                    };
+                }
+                msg = "Bore motor is off";
+            }
+        }
 
+        const filter = { _id: water_level_id };
+        const options = { upsert: true };
+        const result = await WaterLevel.updateOne(filter, updateDoc, options);
+    
+    } catch (err) {
+        return next(CustomErrorHandler.serverError());
+    }
+    
+    return res.send(CustomSuccessHandler.success(msg));
 },
 //---------------------
 
 async updateLedStatus(req, res, next) {
     // const water_level_id = await getWaterLevelId(req.params.unique_id);
+    if (req.params.unique_id === 'undefined') {
+        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+    }
     const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
 
     const { led_status } = req.body;
@@ -72,6 +147,9 @@ async updateLedStatus(req, res, next) {
 
 async updateSumpStatus(req, res, next) {
     // const water_level_id = await getWaterLevelId(req.params.unique_id);
+    if (req.params.unique_id === 'undefined') {
+        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+    }
     const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
     const { sump_status } = req.body;
     try {
@@ -91,6 +169,9 @@ async updateSumpStatus(req, res, next) {
 
 async updateBoreStatus(req, res, next) {
     // const water_level_id = await getWaterLevelId(req.params.unique_id);
+    if (req.params.unique_id === 'undefined') {
+        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+    }
     const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
 
     const { bore_status } = req.body;
@@ -108,7 +189,6 @@ async updateBoreStatus(req, res, next) {
     }
     return res.send(CustomSuccessHandler.success("Bore status updated successfully"));
 },
-
 
 async getWaterLevel(req, res, next) {
     let documents;
@@ -138,6 +218,9 @@ async getWaterLevel(req, res, next) {
 
   async updateWaterLevel(req, res, next) { 
     // const water_level_id = await getWaterLevelId(req.params.unique_id);
+    if (req.params.unique_id === 'undefined') {
+        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+    }
     const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
     try {
       const { water_level, ph_level } = req.body;
@@ -159,6 +242,9 @@ async getWaterLevel(req, res, next) {
   },
 
 async updateSumpLevel(req, res, next) {
+    if (req.params.unique_id === 'undefined') {
+        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+    }
     const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
     try {
         const { sump_level } = req.body;
@@ -177,6 +263,9 @@ async updateSumpLevel(req, res, next) {
 },
 
 async getWaterLevelImage(req, res, next) {
+    if (req.params.unique_id === 'undefined') {
+        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+    }
     try {
         const image_file_name = "water_" + req.params.unique_id;
         // if (fs.existsSync(base64_string.path)) {
@@ -196,6 +285,9 @@ async getWaterLevelImage(req, res, next) {
 },
 
   async saveWaterLevelImage(req, res, next) {
+    if (req.params.unique_id === 'undefined') {
+        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+    }
     const { image } = req.body;
     try {
       const replace_2F = image.replace(/%2F/g, "/"); // %2F = /
