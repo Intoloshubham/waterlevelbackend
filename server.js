@@ -10,10 +10,7 @@ import { Server } from "socket.io";
 import {socketConn,io} from "./utils/SocketService.js";
 import constants from "./constants/index.js";
 
-
-
 const app = express();
-
 
 // const port = process.env.PORT || '8000'
 // const DATABASE_URL = process.env.DATABASE_URL || "mongodb+srv://rohitnamdeo:rohitnamdeo123@cluster0.vkr7r.mongodb.net/consoft";
