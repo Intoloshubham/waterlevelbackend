@@ -11,24 +11,24 @@ import {socketConn,io} from "./utils/SocketService.js";
 import constants from "./constants/index.js";
 
 
+ 
 
-socketConn('connected');
 
 const app = express();
 
 // const port = process.env.PORT || '8000'
 // const DATABASE_URL = process.env.DATABASE_URL || "mongodb+srv://rohitnamdeo:rohitnamdeo123@cluster0.vkr7r.mongodb.net/consoft";
 const port = PORT;
-
+ 
 // Database Connection
 connectDB(DATABASE_URL);
-
+  
 //global
 global.appRoot = path.resolve();
 
 app.use(cors());
 // app.use(express.urlencoded({ extended: false}));
-
+ 
 app.use(
   express.urlencoded({ limit: "10mb", extended: false, parameterLimit: 10000 })
 );
@@ -46,6 +46,7 @@ app.use(errorHandler);
  let server=app.listen(port, () => {
   console.log(`Server listening at ${APP_URL}`);
 });
+
 io.attach(server);
 
 // const io = new Server(server,{

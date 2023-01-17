@@ -8,207 +8,265 @@ import helpers from "../helpers/index.js";
 import { socketConn } from "../utils/SocketService.js";
 
 const WaterLevelController = {
-    async getLedStatus(req, res, next) {
-        let documents;
-    try {
-        documents = await WaterLevel.findOne({unique_id: req.params.unique_id}).select("led_status -_id");
-    } catch (err) {
-        return next(CustomErrorHandler.serverError());
-    }
-    return res.json({ status: 200, data: documents });
-},
-
-async getSumpStatus(req, res, next) {
+  async getLedStatus(req, res, next) {
     let documents;
     try {
-        documents = await WaterLevel.findOne({ unique_id: req.params.unique_id }).select("sump_status -_id");
+      documents = await WaterLevel.findOne({
+        unique_id: req.params.unique_id,
+      }).select("led_status -_id");
     } catch (err) {
-        return next(CustomErrorHandler.serverError());
+      return next(CustomErrorHandler.serverError());
     }
     return res.json({ status: 200, data: documents });
-},
+  },
 
-async getBoreStatus(req, res, next) {
+  async getSumpStatus(req, res, next) {
     let documents;
     try {
-        documents = await WaterLevel.findOne({unique_id: req.params.unique_id}).select("bore_status -_id");
+      documents = await WaterLevel.findOne({
+        unique_id: req.params.unique_id,
+      }).select("sump_status -_id");
     } catch (err) {
-        return next(CustomErrorHandler.serverError());
+      return next(CustomErrorHandler.serverError());
     }
     return res.json({ status: 200, data: documents });
-},
+  },
 
-//---------------------
-async updateMotorStatus(req, res, next){
+  async getBoreStatus(req, res, next) {
+    let documents;
+    try {
+      documents = await WaterLevel.findOne({
+        unique_id: req.params.unique_id,
+      }).select("bore_status -_id");
+    } catch (err) {
+      return next(CustomErrorHandler.serverError());
+    }
+    return res.json({ status: 200, data: documents });
+  },
 
-    if (req.params.unique_id === 'undefined') {
-        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+  //---------------------
+  async updateMotorStatus(req, res, next) {
+    if (req.params.unique_id === "undefined") {
+      return res.send(
+        CustomErrorHandler.idUndefined("Unique ID is undefined!")
+      );
     }
     const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
     const { sump_status, bore_status } = req.body;
     let updateDoc;
-    let msg ;
+    let msg;
+    let type;
+    let mssg;
+    let title;
     try {
-        if ( sump_status || bore_status ) {
-
-            if (sump_status == true) {
-                const document = await WaterLevel.findById(water_level_id).select('sump_level');
-                if (document.sump_level < 35) {
-                    return next(CustomErrorHandler.inValid('Your sump level is ' + document.sump_level + '%. If you want to start sump minimum level is required above 35%.'));
-                }
-                updateDoc = {
-                    $set: {
-                        motor_status: true,
-                        sump_status: sump_status,
-                    },
-                };
-                msg = "Sump motor is on";
-            }else if (bore_status == true) {
-                updateDoc = {
-                    $set: {
-                        motor_status: true,
-                        bore_status: bore_status,
-                    },
-                };
-                msg = "Bore motor is on";
-            }
-            
-        }else{
-            const document = await WaterLevel.findById(water_level_id).select('sump_status bore_status');
-            if (sump_status == false) {
-                if (document.bore_status == true) {
-                    updateDoc = {
-                        $set: {
-                            sump_status: sump_status,
-                        },
-                    };
-                }else{
-                    updateDoc = {
-                        $set: {
-                            motor_status: false,
-                            sump_status: sump_status,
-                        },
-                    };
-                }
-                msg = "Sump motor is off";
-            }else if (bore_status == false) {
-                if (document.sump_status == true) {
-                    updateDoc = {
-                        $set: {
-                            bore_status: bore_status,
-                        },
-                    };
-                }else{
-                    updateDoc = {
-                        $set: {
-                            motor_status: false,
-                            bore_status: bore_status,
-                        },
-                    };
-                }
-                msg = "Bore motor is off";
-            }
+      if (sump_status || bore_status) {
+        if (sump_status == true) {
+          const document = await WaterLevel.findById(water_level_id).select(
+            "sump_level"
+          );
+          if (document.sump_level < 35) {
+            return next(
+              CustomErrorHandler.inValid(
+                "Your sump level is " +
+                  document.sump_level +
+                  "%. If you want to start sump minimum level is required above 35%."
+              )
+            );
+          }
+          updateDoc = {
+            $set: {
+              motor_status: true,
+              sump_status: sump_status,
+            },
+          };
+          msg = "Sump motor is on";
+        } else if (bore_status == true) {
+          updateDoc = {
+            $set: {
+              motor_status: true,
+              bore_status: bore_status,
+            },
+          };
+          msg = "Bore motor is on";
         }
-
-        const filter = { _id: water_level_id };
-        const options = { new: true };
-        const result = await WaterLevel.findOneAndUpdate(filter, updateDoc, options);
-        if (result.sump_status) {
-          socketConn("Sump motor is on")
-        }else if(result.bore_status){
-          socketConn("Bore motor is on")
-        }else if(result.sump_status==false){
-          socketConn("Sump motor is off")
-        }else if(result.bore_status==false){
-          socketConn("Bore motor is off")
+      } else {
+        const document = await WaterLevel.findById(water_level_id).select(
+          "sump_status bore_status"
+        );
+        if (sump_status == false) {
+          if (document.bore_status == true) {
+            updateDoc = {
+              $set: {
+                sump_status: sump_status,
+              },
+            };
+          } else {
+            updateDoc = {
+              $set: {
+                motor_status: false,
+                sump_status: sump_status,
+              },
+            };
+          }
+          msg = "Sump motor is off";
+        } else if (bore_status == false) {
+          if (document.sump_status == true) {
+            updateDoc = {
+              $set: {
+                bore_status: bore_status,
+              },
+            };
+          } else {
+            updateDoc = {
+              $set: {
+                motor_status: false,
+                bore_status: bore_status,
+              },
+            };
+          }
+          msg = "Bore motor is off";
         }
-        // console.log("🚀 ~ file: WaterLevelController.js:116 ~ updateMotorStatus ~ result", result)
-    
+      }
+
+      const filter = { _id: water_level_id };
+      const options = { new: true };
+      const result = await WaterLevel.findOneAndUpdate(
+        filter,
+        updateDoc,
+        options
+      );
+
+      if (sump_status) {
+        type = "SUMP_ON";
+        mssg = "Sump motor is On";
+        title = "Sump Motor";
+      }
+
+      if (sump_status == false) {
+        type = "SUMP_OFF";
+        mssg = "Sump motor is Off";
+        title = "Sump Motor";
+      }
+
+      if (bore_status) {
+        type = "BORE_ON";
+        mssg = "Bore motor is On";
+        title = "Bore Motor";
+      }
+
+      if (bore_status == false) {
+        type = "BORE_OFF";
+        mssg = "Bore motor is Off";
+        title = "Bore Motor";
+      }
+
+      socketConn.emit(
+        "notification",
+        {
+          message: mssg,
+          title: title,
+        },
+        type
+      );
     } catch (err) {
-        return next(CustomErrorHandler.serverError());
+      return next(CustomErrorHandler.serverError());
     }
-    
-    return res.send(CustomSuccessHandler.success(msg));
-},
-//---------------------
 
-async updateLedStatus(req, res, next) {
+    return res.send(CustomSuccessHandler.success(msg));
+  },
+  //---------------------
+
+  async updateLedStatus(req, res, next) {
     // const water_level_id = await getWaterLevelId(req.params.unique_id);
-    if (req.params.unique_id === 'undefined') {
-        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+    if (req.params.unique_id === "undefined") {
+      return res.send(
+        CustomErrorHandler.idUndefined("Unique ID is undefined!")
+      );
     }
     const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
 
     const { led_status } = req.body;
     try {
-        const filter = { _id: water_level_id };
-        const options = { upsert: true };
-        const updateDoc = {
-            $set: {
-                led_status: led_status,
-            },
-        };
-        const result = await WaterLevel.updateOne(filter, updateDoc, options);
+      const filter = { _id: water_level_id };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          led_status: led_status,
+        },
+      };
+      const result = await WaterLevel.updateOne(filter, updateDoc, options);
     } catch (err) {
-        return next(CustomErrorHandler.serverError());
+      return next(CustomErrorHandler.serverError());
     }
-    return res.send(CustomSuccessHandler.success("Led status updated successfully"));
-},
+    return res.send(
+      CustomSuccessHandler.success("Led status updated successfully")
+    );
+  },
 
-async updateSumpStatus(req, res, next) {
+  async updateSumpStatus(req, res, next) {
     // const water_level_id = await getWaterLevelId(req.params.unique_id);
-    if (req.params.unique_id === 'undefined') {
-        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+    if (req.params.unique_id === "undefined") {
+      return res.send(
+        CustomErrorHandler.idUndefined("Unique ID is undefined!")
+      );
     }
     const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
     const { sump_status } = req.body;
     try {
-        const filter = { _id: water_level_id };
-        const options = { upsert: true };
-        const updateDoc = {
-            $set: {
-                sump_status: sump_status,
-            },
-        };
-        const result = await WaterLevel.updateOne(filter, updateDoc, options);
+      const filter = { _id: water_level_id };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          sump_status: sump_status,
+        },
+      };
+      const result = await WaterLevel.updateOne(filter, updateDoc, options);
     } catch (err) {
-        return next(CustomErrorHandler.serverError());
+      return next(CustomErrorHandler.serverError());
     }
-    return res.send(CustomSuccessHandler.success("Sump status updated successfully"));
-},
+    return res.send(
+      CustomSuccessHandler.success("Sump status updated successfully")
+    );
+  },
 
-async updateBoreStatus(req, res, next) {
+  async updateBoreStatus(req, res, next) {
     // const water_level_id = await getWaterLevelId(req.params.unique_id);
-    if (req.params.unique_id === 'undefined') {
-        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+    if (req.params.unique_id === "undefined") {
+      return res.send(
+        CustomErrorHandler.idUndefined("Unique ID is undefined!")
+      );
     }
     const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
 
     const { bore_status } = req.body;
     try {
-        const filter = { _id: water_level_id };
-        const options = { upsert: true };
-        const updateDoc = {
-            $set: {
-                bore_status: bore_status,
-            },
-        };
-        const result = await WaterLevel.updateOne(filter, updateDoc, options);
+      const filter = { _id: water_level_id };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          bore_status: bore_status,
+        },
+      };
+      const result = await WaterLevel.updateOne(filter, updateDoc, options);
     } catch (err) {
-        return next(CustomErrorHandler.serverError());
+      return next(CustomErrorHandler.serverError());
     }
-    return res.send(CustomSuccessHandler.success("Bore status updated successfully"));
-},
+    return res.send(
+      CustomSuccessHandler.success("Bore status updated successfully")
+    );
+  },
 
-async getWaterLevel(req, res, next) {
+  async getWaterLevel(req, res, next) {
     let documents;
     try {
-        documents = await WaterLevel.findOne({unique_id: req.params.unique_id}).select("-__v");
+      documents = await WaterLevel.findOne({
+        unique_id: req.params.unique_id,
+      }).select("-__v");
     } catch (err) {
-        return next(CustomErrorHandler.serverError());
+      return next(CustomErrorHandler.serverError());
     }
     return res.json({ status: 200, data: documents });
-},
+  },
 
   async prevWaterLevel(req, res, next) {
     let documents;
@@ -226,10 +284,12 @@ async getWaterLevel(req, res, next) {
     }
   },
 
-  async updateWaterLevel(req, res, next) { 
+  async updateWaterLevel(req, res, next) {
     // const water_level_id = await getWaterLevelId(req.params.unique_id);
-    if (req.params.unique_id === 'undefined') {
-        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+    if (req.params.unique_id === "undefined") {
+      return res.send(
+        CustomErrorHandler.idUndefined("Unique ID is undefined!")
+      );
     }
     const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
     try {
@@ -251,52 +311,60 @@ async getWaterLevel(req, res, next) {
     );
   },
 
-async updateSumpLevel(req, res, next) {
-    if (req.params.unique_id === 'undefined') {
-        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+  async updateSumpLevel(req, res, next) {
+    if (req.params.unique_id === "undefined") {
+      return res.send(
+        CustomErrorHandler.idUndefined("Unique ID is undefined!")
+      );
     }
     const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
     try {
-        const { sump_level } = req.body;
-        const filter = { _id: water_level_id };
-        const options = { upsert: true };
-        const updateDoc = {
-            $set: {
-                sump_level
-            },
-        };
-        const result = await WaterLevel.updateOne(filter, updateDoc, options);
+      const { sump_level } = req.body;
+      const filter = { _id: water_level_id };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          sump_level,
+        },
+      };
+      const result = await WaterLevel.updateOne(filter, updateDoc, options);
     } catch (err) {
-        return next(CustomErrorHandler.serverError());
+      return next(CustomErrorHandler.serverError());
     }
-    return res.send(CustomSuccessHandler.success("Sump Level updated successfully"));
-},
+    return res.send(
+      CustomSuccessHandler.success("Sump Level updated successfully")
+    );
+  },
 
-async getWaterLevelImage(req, res, next) {
-    if (req.params.unique_id === 'undefined') {
-        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+  async getWaterLevelImage(req, res, next) {
+    if (req.params.unique_id === "undefined") {
+      return res.send(
+        CustomErrorHandler.idUndefined("Unique ID is undefined!")
+      );
     }
     try {
-        const image_file_name = "water_" + req.params.unique_id;
-        // if (fs.existsSync(base64_string.path)) {
-        if (fs.existsSync("uploads/files/" + image_file_name + ".txt")) {
+      const image_file_name = "water_" + req.params.unique_id;
+      // if (fs.existsSync(base64_string.path)) {
+      if (fs.existsSync("uploads/files/" + image_file_name + ".txt")) {
         const base64_string = fs.createReadStream(
-            "uploads/files/" + image_file_name + ".txt",
-            "utf-8"
+          "uploads/files/" + image_file_name + ".txt",
+          "utf-8"
         );
         base64_string.pipe(res);
-        } else {
+      } else {
         res.send(CustomErrorHandler.notExist("File not exist"));
-        }
+      }
     } catch (error) {
-        return next(CustomErrorHandler.serverError());
+      return next(CustomErrorHandler.serverError());
     }
     // base64_string.pipe(res);
-},
+  },
 
   async saveWaterLevelImage(req, res, next) {
-    if (req.params.unique_id === 'undefined') {
-        return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+    if (req.params.unique_id === "undefined") {
+      return res.send(
+        CustomErrorHandler.idUndefined("Unique ID is undefined!")
+      );
     }
     const { image } = req.body;
     try {
