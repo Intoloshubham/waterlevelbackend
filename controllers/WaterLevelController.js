@@ -6,9 +6,6 @@ import CustomSuccessHandler from "../services/CustomSuccessHandler.js";
 import CustomFunction from "../services/CustomFunction.js";
 import helpers from "../helpers/index.js";
 
-
-
-
 const WaterLevelController = {
     async getLedStatus(req, res, next) {
         let documents;
@@ -112,14 +109,10 @@ async updateBoreStatus(req, res, next) {
 async getWaterLevel(req, res, next) {
     let documents;
     try {
-<<<<<<< HEAD
-        documents = await WaterLevel.findOne({unique_id: req.params.unique_id}).select("-__v");
-=======
       documents = await WaterLevel.findOne({
         unique_id: req.params.unique_id,
       }).select("-__v");
 
->>>>>>> 56b33e07c8f4c09ff877beaa662aa4698987d3d6
     } catch (err) {
         return next(CustomErrorHandler.serverError());
     }
