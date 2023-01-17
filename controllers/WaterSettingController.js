@@ -4,6 +4,7 @@ import CustomSuccessHandler from "../services/CustomSuccessHandler.js";
 import helpers from "../helpers/index.js";
 import Constants from "../constants/index.js";
 
+
 const WaterSettingController = {
 
     async getWaterSetting(req, res, next){
@@ -72,6 +73,7 @@ const WaterSettingController = {
                         uses_notification:status    
                     }
                 };
+    
             }else if (notification_type == Constants.LEAKAGE) {
                 updateDoc = {
                     $set: {

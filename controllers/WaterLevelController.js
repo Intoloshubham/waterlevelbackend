@@ -5,6 +5,7 @@ import CustomErrorHandler from "../services/CustomErrorHandler.js";
 import CustomSuccessHandler from "../services/CustomSuccessHandler.js";
 import CustomFunction from "../services/CustomFunction.js";
 import helpers from "../helpers/index.js";
+import { socketConn } from "../utils/SocketService.js";
 
 
 
@@ -43,6 +44,9 @@ async getBoreStatus(req, res, next) {
 //---------------------
 async updateMotorStatus(req, res, next){
     const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
+    if (water_level_id) {
+      socketConn()
+    }
     const { led_status } = req.body;
 
 
