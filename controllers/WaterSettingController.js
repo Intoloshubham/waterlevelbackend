@@ -4,11 +4,11 @@ import CustomSuccessHandler from "../services/CustomSuccessHandler.js";
 import helpers from "../helpers/index.js";
 import Constants from "../constants/index.js";
 
-
 const WaterSettingController = {
 
     async getWaterSetting(req, res, next){
         let documents;
+
         try {
             const exist = await WaterLevel.exists({unique_id:req.params.unique_id});
             if (!exist) {
@@ -23,6 +23,9 @@ const WaterSettingController = {
 
     async setWaterSetting(req, res, next){
         // const water_level_id = await getWaterLevelId(req.params.unique_id);
+        if (req.params.unique_id === 'undefined') {
+            return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+        }
         const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
 
         const { start_level, stop_level, pump_notification } = req.body;
@@ -60,7 +63,9 @@ const WaterSettingController = {
     // async setMotorNotificationSetting(req, res, next){
     async notificationSetting(req, res, next){
         // const water_level_id = await getWaterLevelId(req.params.unique_id);
-        
+        if (req.params.unique_id === 'undefined') {
+            return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+        }
         const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
         const { notification_type, status } = req.body;
         try {
@@ -73,7 +78,6 @@ const WaterSettingController = {
                         uses_notification:status    
                     }
                 };
-    
             }else if (notification_type == Constants.LEAKAGE) {
                 updateDoc = {
                     $set: {
@@ -117,7 +121,10 @@ const WaterSettingController = {
     },
 
     async tankHeightSetting(req, res, next){
-        
+        // const water_level_id = await getWaterLevelId(req.params.unique_id);
+        if (req.params.unique_id === 'undefined') {
+            return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+        }
         const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
    
         const { tank_height_type, tank_height, tank_height_unit } = req.body;
@@ -141,6 +148,9 @@ const WaterSettingController = {
 
     async waterSourceSetting(req, res, next){
         // const water_level_id = await getWaterLevelId(req.params.unique_id);
+        if (req.params.unique_id === 'undefined') {
+            return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
+        }
         const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
         const { water_source_1, water_source_2 } = req.body;
         try {
