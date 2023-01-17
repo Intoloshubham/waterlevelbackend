@@ -7,13 +7,14 @@ const io = new Server();
 
 
 
-const socketConn=()=>{
+const socketConn=(data)=>{
 
   io.on(constants.CONN, (socket) => {
+    console.log('data===',data)
     console.log("on connection", socket.id);  
 
     socket.emit("send_online_friend", "i m from server  d");
-    socket.emit("notify", "i m from ser");    
+    socket.emit("notify", data);    
   
     socket.on("disconnect", () => {
       console.log("user disconnected");

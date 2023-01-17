@@ -10,6 +10,10 @@ import { Server } from "socket.io";
 import {socketConn,io} from "./utils/SocketService.js";
 import constants from "./constants/index.js";
 
+
+
+socketConn('connected');
+
 const app = express();
 
 // const port = process.env.PORT || '8000'
@@ -33,7 +37,7 @@ app.use(
 // app.use(express.json())
 app.use(express.json({ limit: "10mb" }));
 
-// Load Routes
+// Load Routes 
 app.use("/api", routes);
 app.use("/uploads", express.static("uploads"));
 

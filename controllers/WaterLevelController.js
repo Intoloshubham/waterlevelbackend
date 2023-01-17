@@ -111,8 +111,18 @@ async updateMotorStatus(req, res, next){
         }
 
         const filter = { _id: water_level_id };
-        const options = { upsert: true };
-        const result = await WaterLevel.updateOne(filter, updateDoc, options);
+        const options = { new: true };
+        const result = await WaterLevel.findOneAndUpdate(filter, updateDoc, options);
+        if (result.sump_status) {
+          socketConn("Sump motor is on")
+        }else if(result.bore_status){
+          socketConn("Bore motor is on")
+        }else if(result.sump_status==false){
+          socketConn("Sump motor is off")
+        }else if(result.bore_status==false){
+          socketConn("Bore motor is off")
+        }
+        // console.log("🚀 ~ file: WaterLevelController.js:116 ~ updateMotorStatus ~ result", result)
     
     } catch (err) {
         return next(CustomErrorHandler.serverError());
