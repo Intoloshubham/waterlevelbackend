@@ -7,6 +7,11 @@ import { ObjectId } from "mongodb";
 const WaterUsesController = {
   async index(req, res, next) {
     try {
+      const temp=await WaterUse.find();
+ 
+
+      res.send({status:200,data:temp});
+
     } catch (error) {
       return next(CustomErrorHandler.serverError());
     }

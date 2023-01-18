@@ -18,6 +18,7 @@ router.delete('/logout-user', UserController.logoutUser);
 router.get('/check-token-exist', UserController.checkTokenExist);
 
 //Water Uses 
+router.get('/water-uses',WaterUsesController.index);
 router.post('/water-uses',WaterUsesController.store);
 
 ///water level
