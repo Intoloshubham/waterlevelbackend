@@ -130,11 +130,13 @@ const WaterSettingController = {
         mssg='Leakage Notification is On';
         title='Leakage Notification';
       }
+
       if (notification_type == Constants.QUALITY) {
         type= Constants.QUALITY;
         mssg='Quality Notification is On';
         title='Quality Notification';
       }
+      
       if (notification_type == Constants.NEED_CLEANING) {
         type= Constants.NEED_CLEANING;
         mssg='Cleaning Notification is On';

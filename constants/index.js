@@ -12,5 +12,7 @@ export default {
   LEAKAGE: "Leakage",
   QUALITY: "Quality",
   NEED_CLEANING: "NeedCleaning",
-  CONN:"connection"
+  CONN:"connection",
+  START_LEVEL:35,
+  STOP_LEVEL:80
 };

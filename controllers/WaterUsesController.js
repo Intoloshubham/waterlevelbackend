@@ -1,6 +1,6 @@
 import CustomErrorHandler from "../services/CustomErrorHandler.js";
 import CustomSuccessHandler from "../services/CustomSuccessHandler.js";
-import { WaterUse } from "../models/index.js";
+import { WaterUse, WaterUsesDetails } from "../models/index.js";
 import Constants from "../constants/index.js";
 import { ObjectId } from "mongodb";
 
@@ -14,12 +14,19 @@ const WaterUsesController = {
       return next(CustomErrorHandler.serverError());
     }
   },
-
+  async getUsage(req, res, next) {
+    try {
+      const temp = await WaterUsesDetails.find();  
+      res.send({ status: 200,  data:temp });
+    } catch (error) {
+      return next(CustomErrorHandler.serverError());
+    }
+  },
   async store(req, res, next) {
     try {
       const pie = 3.14;
       let volume = 0;
-      let radius = 0;
+      let radius = 0; 
       let updateDoc;
 
       const {

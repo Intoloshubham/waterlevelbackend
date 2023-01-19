@@ -19,6 +19,7 @@ router.get('/check-token-exist', UserController.checkTokenExist);
 
 //Water Uses 
 router.get('/water-uses',WaterUsesController.index);
+router.get('/cal-water-usage',WaterUsesController.getUsage);
 router.post('/water-uses',WaterUsesController.store);
 
 ///water level

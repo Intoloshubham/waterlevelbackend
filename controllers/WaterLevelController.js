@@ -1,11 +1,12 @@
 import fs from "fs";
 import { ObjectId } from "mongodb";
-import { WaterLevel } from "../models/index.js";
+import { WaterLevel, WaterSetting, WaterUsesDetails } from "../models/index.js";
 import CustomErrorHandler from "../services/CustomErrorHandler.js";
 import CustomSuccessHandler from "../services/CustomSuccessHandler.js";
 import CustomFunction from "../services/CustomFunction.js";
 import helpers from "../helpers/index.js";
 import { socketConn } from "../utils/SocketService.js";
+import constants from "../constants/index.js";
 
 const WaterLevelController = {
   async getLedStatus(req, res, next) {
@@ -54,6 +55,7 @@ const WaterLevelController = {
     const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
     const { sump_status, bore_status } = req.body;
     let updateDoc;
+    let level;
     let msg;
     let type;
     let mssg;
@@ -62,8 +64,9 @@ const WaterLevelController = {
       if (sump_status || bore_status) {
         if (sump_status == true) {
           const document = await WaterLevel.findById(water_level_id).select(
-            "sump_level"
+            "sump_level water_level"
           );
+          level = document.water_level;
           if (document.sump_level < 35) {
             return next(
               CustomErrorHandler.inValid(
@@ -91,8 +94,9 @@ const WaterLevelController = {
         }
       } else {
         const document = await WaterLevel.findById(water_level_id).select(
-          "sump_status bore_status"
+          "sump_status bore_status water_level"
         );
+        level = document.water_level;
         if (sump_status == false) {
           if (document.bore_status == true) {
             updateDoc = {
@@ -136,6 +140,15 @@ const WaterLevelController = {
         options
       );
 
+      // console.log('level--',level);
+      if (result.motor_status) {
+        WaterLevelController.calculateWaterUsage(
+          level,
+          req.params.unique_id,
+          water_level_id
+        );
+      }
+
       if (sump_status) {
         type = "SUMP_ON";
         mssg = "Sump motor is On";
@@ -174,6 +187,71 @@ const WaterLevelController = {
 
     return res.send(CustomSuccessHandler.success(msg));
   },
+  //---------------------
+
+  calculateWaterUsage: async (level, uniqueId, water_level_id) => {
+    try {
+      const year = CustomFunction.currentYearMonthDay("YYYY");
+      const month = CustomFunction.currentYearMonthDay("MM");
+      const current_date = CustomFunction.currentDate();
+      const current_time = CustomFunction.currentTime();
+      const month_name = CustomFunction.monthName();
+      const default_start_level = constants.START_LEVEL;
+      const default_stop_level = constants.STOP_LEVEL;
+
+      const waterStartStopLevel = await WaterSetting.findOne({
+        water_level_id: water_level_id,
+      }).select("start_level stop_level");
+  
+      if (waterStartStopLevel.start_level>0 && waterStartStopLevel.stop_level>0) {
+        level =
+          waterStartStopLevel.stop_level - waterStartStopLevel.start_level;
+      } else {
+        level = default_stop_level - default_start_level;
+      }
+
+      const exist = await WaterUsesDetails.exists({
+        water_uses_id: water_level_id,
+        month: month,
+        year: year,
+        unique_id: uniqueId
+      });
+      if (!exist) {
+        const waterSchema = new WaterUsesDetails({
+          water_uses_id: water_level_id,
+          unique_id: uniqueId,
+          year: year,
+          month: month,
+          month_name: month_name,
+          waterUsage: [
+            {
+              level: level,
+            },
+          ],
+        });
+        const temp = await waterSchema.save();
+      } else {
+        const temp = await WaterUsesDetails.findByIdAndUpdate(
+          {
+            _id: exist._id,
+          },
+          {
+            $push: {
+              waterUsage: {
+                present_date: current_date,
+                in_time: current_time,
+                level: level,
+              },
+            },
+          },
+          { new: true }
+        );
+      }
+    } catch (error) {
+      console.log("error");
+    }
+  },
+
   //---------------------
 
   async updateLedStatus(req, res, next) {
