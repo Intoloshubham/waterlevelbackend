@@ -7,11 +7,9 @@ import { ObjectId } from "mongodb";
 const WaterUsesController = {
   async index(req, res, next) {
     try {
-      const temp=await WaterUse.find();
- 
+      const temp = await WaterUse.find();
 
-      res.send({status:200,data:temp});
-
+      res.send({ status: 200, data: temp });
     } catch (error) {
       return next(CustomErrorHandler.serverError());
     }
@@ -20,8 +18,8 @@ const WaterUsesController = {
   async store(req, res, next) {
     try {
       const pie = 3.14;
-      let volume=0;
-      let radius=0;
+      let volume = 0;
+      let radius = 0;
       let updateDoc;
 
       const {
@@ -32,7 +30,7 @@ const WaterUsesController = {
         tank_diameter,
         tank_height,
         unique_id,
-        unit
+        unit,
       } = req.body;
 
       const exist = await WaterUse.exists({
@@ -42,7 +40,6 @@ const WaterUsesController = {
         strength: 1,
       });
 
-      
       if (tank_shape === Constants.CUBOIDAL) {
         volume = tank_length * tank_breadth * tank_height;
       } else {
@@ -67,21 +64,20 @@ const WaterUsesController = {
         //   };
         // const result = await WaterUse.updateOne(filter, updateDoc, options);
         await WaterUse.deleteMany({});
-      } 
+      }
       const temp = new WaterUse({
-          unique_id,
-          no_of_users,
-          tank_shape,
-          tank_length,
-          tank_breadth,
-          tank_height,
-          unit,
-          radius: radius,
-          volume: volume,
-        });
+        unique_id,
+        no_of_users,
+        tank_shape,
+        tank_length,
+        tank_breadth,
+        tank_height,
+        unit,
+        radius: radius,
+        volume: volume,
+      });
 
-        const tem = await temp.save();
-      
+      const tem = await temp.save();
 
       // if (exist) {
 

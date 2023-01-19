@@ -3,175 +3,232 @@ import CustomErrorHandler from "../services/CustomErrorHandler.js";
 import CustomSuccessHandler from "../services/CustomSuccessHandler.js";
 import helpers from "../helpers/index.js";
 import Constants from "../constants/index.js";
+import { socketConn } from "../utils/SocketService.js";
 
 const WaterSettingController = {
+  async getWaterSetting(req, res, next) {
+    let documents;
 
-    async getWaterSetting(req, res, next){
-        let documents;
+    try {
+      const exist = await WaterLevel.exists({
+        unique_id: req.params.unique_id,
+      });
+      if (!exist) {
+        return next(CustomErrorHandler.notFound("Data not fount"));
+      }
+      documents = await WaterSetting.findOne({
+        water_level_id: exist._id,
+      }).select("-__v");
+    } catch (err) {
+      return next(CustomErrorHandler.serverError());
+    }
+    return res.json({ status: 200, data: documents });
+  },
 
-        try {
-            const exist = await WaterLevel.exists({unique_id:req.params.unique_id});
-            if (!exist) {
-                return next(CustomErrorHandler.notFound('Data not fount'))
-            }
-            documents = await WaterSetting.findOne({water_level_id:exist._id}).select('-__v');
-        } catch (err) {
-            return next(CustomErrorHandler.serverError());
-        }
-        return res.json({status:200, data:documents});
-    },
+  async setWaterSetting(req, res, next) {
+    // const water_level_id = await getWaterLevelId(req.params.unique_id);
+    if (req.params.unique_id === "undefined") {
+      return res.send(
+        CustomErrorHandler.idUndefined("Unique ID is undefined!")
+      );
+    }
+    const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
 
-    async setWaterSetting(req, res, next){
-        // const water_level_id = await getWaterLevelId(req.params.unique_id);
-        if (req.params.unique_id === 'undefined') {
-            return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
-        }
-        const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
+    const { start_level, stop_level, pump_notification } = req.body;
+    try {
+      if (stop_level <= start_level) {
+        return next(
+          CustomErrorHandler.inValid(
+            "Maximum Level is not allow less than Minimum Level"
+          )
+        );
+      }
 
-        const { start_level, stop_level, pump_notification } = req.body;
-        try {
-            if (stop_level <= start_level ) {
-                return next(CustomErrorHandler.inValid('Maximum Level is not allow less than Minimum Level'));
-            }
+      const diff = stop_level - start_level;
+      if (diff < 10) {
+        return next(
+          CustomErrorHandler.inValid(
+            "Difference between minimum and maximum level is 10. Like (minimum is - 10 than maximum is - 20) "
+          )
+        );
+      }
+    } catch (err) {
+      return next(CustomErrorHandler.serverError());
+    }
 
-            const diff = stop_level - start_level ;
-            if (diff < 10 ) {
-                return next(CustomErrorHandler.inValid('Difference between minimum and maximum level is 10. Like (minimum is - 10 than maximum is - 20) '));
-            }
+    try {
+      const filter = { water_level_id: water_level_id };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          ...(start_level && { start_level: start_level }),
+          ...(stop_level && { stop_level: stop_level }),
+        },
+      };
+      const result = await WaterSetting.updateOne(filter, updateDoc, options);
+    } catch (err) {
+      return next(CustomErrorHandler.serverError());
+    }
+    return res.send(
+      CustomSuccessHandler.success(
+        "Water level min and max percentage updated successfully"
+      )
+    );
+  },
 
-        } catch (err) {
-            return next(CustomErrorHandler.serverError());
-        }
-        
-        try {
-            const filter = { water_level_id: water_level_id};
-            const options = { upsert: true };
-            const updateDoc = {
-                $set: {
-                    ...(start_level && { start_level: start_level}),
-                    ...(stop_level && { stop_level: stop_level }),
-                }
-            };
-            const result = await WaterSetting.updateOne(filter, updateDoc, options);
-            
-        } catch (err) {
-            return next(CustomErrorHandler.serverError());
-        }
-        return res.send(CustomSuccessHandler.success('Water level min and max percentage updated successfully'));
-    },
+  // async setMotorNotificationSetting(req, res, next){
+  async notificationSetting(req, res, next) {
+    // const water_level_id = await getWaterLevelId(req.params.unique_id);
+    let type;
+    let mssg;
+    let title;
+    if (req.params.unique_id === "undefined") {
+      return res.send(
+        CustomErrorHandler.idUndefined("Unique ID is undefined!")
+      );
+    }
+    const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
+    const { notification_type, status } = req.body;
+    try {
+      const filter = { water_level_id: water_level_id };
+      const options = { upsert: true };
+      let updateDoc;
+      if (notification_type == Constants.USES) {
+        updateDoc = {
+          $set: {
+            uses_notification: status,
+          },
+        };
+      } else if (notification_type == Constants.LEAKAGE) {
+        updateDoc = {
+          $set: {
+            leakage_notification: status,
+          },
+        };
+      } else if (notification_type == Constants.QUALITY) {
+        updateDoc = {
+          $set: {
+            quality_notification: status,
+          },
+        };
+      } else if (notification_type == Constants.NEED_CLEANING) {
+        updateDoc = {
+          $set: {
+            need_cleaning_notification: status,
+          },
+        };
+      }
+      const result = await WaterSetting.updateOne(filter, updateDoc, options);
+      if (notification_type==Constants.USES) {
+        type= Constants.USES;
+        mssg='Uses Notification is On';
+        title='Uses Notification';
+      }
 
-    // async setMotorNotificationSetting(req, res, next){
-    async notificationSetting(req, res, next){
-        // const water_level_id = await getWaterLevelId(req.params.unique_id);
-        if (req.params.unique_id === 'undefined') {
-            return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
-        }
-        const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
-        const { notification_type, status } = req.body;
-        try {
-            const filter = { water_level_id: water_level_id};
-            const options = { upsert: true };
-            let updateDoc;
-            if (notification_type == Constants.USES) {
-                updateDoc = {
-                    $set: {
-                        uses_notification:status    
-                    }
-                };
-            }else if (notification_type == Constants.LEAKAGE) {
-                updateDoc = {
-                    $set: {
-                        leakage_notification:status    
-                    }
-                };
-            }else if (notification_type == Constants.QUALITY) {
-                updateDoc = {
-                    $set: {
-                        quality_notification:status    
-                    }
-                };
-            }else if (notification_type == Constants.NEED_CLEANING) {
-                updateDoc = {
-                    $set: {
-                        need_cleaning_notification:status    
-                    }
-                };
-            }
+      if (notification_type == Constants.LEAKAGE) {
+        type= Constants.USES;
+        mssg='Leakage Notification is On';
+        title='Leakage Notification';
+      }
+      if (notification_type == Constants.QUALITY) {
+        type= Constants.QUALITY;
+        mssg='Quality Notification is On';
+        title='Quality Notification';
+      }
+      if (notification_type == Constants.NEED_CLEANING) {
+        type= Constants.NEED_CLEANING;
+        mssg='Cleaning Notification is On';
+        title='Need Cleaning Notification';
+      }
 
-            const result = await WaterSetting.updateOne(filter, updateDoc, options);
-        } catch (err) {
-            return next(err);
-        }
-        return res.send(CustomSuccessHandler.success('Notification updated successfully'));
-        // const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
-        // const { motor_notification } = req.body;
-        // try {
-        //     const filter = { water_level_id: water_level_id};
-        //     const options = { upsert: true };
-        //     const updateDoc = {
-        //         $set: {
-        //             motor_notification
-        //         }
-        //     };
-        //     const result = await WaterSetting.updateOne(filter, updateDoc, options);
-        // } catch (err) {
-        //     return next(err);
-        // }
-        // return res.send(CustomSuccessHandler.success('Motor notification updated successfully'));
-    },
+      socketConn.emit(
+        "tank_notification",
+        {
+          message:mssg,
+          title,
+        },
+        type
+      );
+    } catch (err) {
+      return next(err);
+    }
+    return res.send(
+      CustomSuccessHandler.success("Notification updated successfully")
+    );
+    // const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
+    // const { motor_notification } = req.body;
+    // try {
+    //     const filter = { water_level_id: water_level_id};
+    //     const options = { upsert: true };
+    //     const updateDoc = {
+    //         $set: {
+    //             motor_notification
+    //         }
+    //     };
+    //     const result = await WaterSetting.updateOne(filter, updateDoc, options);
+    // } catch (err) {
+    //     return next(err);
+    // }
+    // return res.send(CustomSuccessHandler.success('Motor notification updated successfully'));
+  },
 
-    async tankHeightSetting(req, res, next){
-        // const water_level_id = await getWaterLevelId(req.params.unique_id);
-        if (req.params.unique_id === 'undefined') {
-            return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
-        }
-        const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
-   
-        const { tank_height_type, tank_height, tank_height_unit } = req.body;
+  async tankHeightSetting(req, res, next) {
+    // const water_level_id = await getWaterLevelId(req.params.unique_id);
+    if (req.params.unique_id === "undefined") {
+      return res.send(
+        CustomErrorHandler.idUndefined("Unique ID is undefined!")
+      );
+    }
+    const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
 
-        try {
-            const filter = { water_level_id: water_level_id};
-            const options = { upsert: true };
-            const updateDoc = {
-                $set: {
-                    tank_height_type,
-                    tank_height,
-                    tank_height_unit,
-                }
-            };
-            const result = await WaterSetting.updateOne(filter, updateDoc, options);
-        } catch (err) {
-            return next(err);
-        }
-        return res.send(CustomSuccessHandler.success('Water tank height updated successfully'));
-    },
+    const { tank_height_type, tank_height, tank_height_unit } = req.body;
 
-    async waterSourceSetting(req, res, next){
-        // const water_level_id = await getWaterLevelId(req.params.unique_id);
-        if (req.params.unique_id === 'undefined') {
-            return res.send(CustomErrorHandler.idUndefined('Unique ID is undefined!'));
-        }
-        const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
-        const { water_source_1, water_source_2 } = req.body;
-        try {
-            const filter = { water_level_id: water_level_id};
-            const options = { upsert: true };
-            const updateDoc = {
-                $set: {
-                    water_source_1,
-                    water_source_2,
-                }
-            };
-            const result = await WaterSetting.updateOne(filter, updateDoc, options);
-        } catch (err) {
-            return next(err);
-        }
-        return res.send(CustomSuccessHandler.success('Water source updated successfully'));
-    },
+    try {
+      const filter = { water_level_id: water_level_id };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          tank_height_type,
+          tank_height,
+          tank_height_unit,
+        },
+      };
+      const result = await WaterSetting.updateOne(filter, updateDoc, options);
+    } catch (err) {
+      return next(err);
+    }
+    return res.send(
+      CustomSuccessHandler.success("Water tank height updated successfully")
+    );
+  },
 
-    
-
-}
+  async waterSourceSetting(req, res, next) {
+    // const water_level_id = await getWaterLevelId(req.params.unique_id);
+    if (req.params.unique_id === "undefined") {
+      return res.send(
+        CustomErrorHandler.idUndefined("Unique ID is undefined!")
+      );
+    }
+    const water_level_id = await helpers.getWaterLevelId(req.params.unique_id);
+    const { water_source_1, water_source_2 } = req.body;
+    try {
+      const filter = { water_level_id: water_level_id };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          water_source_1,
+          water_source_2,
+        },
+      };
+      const result = await WaterSetting.updateOne(filter, updateDoc, options);
+    } catch (err) {
+      return next(err);
+    }
+    return res.send(
+      CustomSuccessHandler.success("Water source updated successfully")
+    );
+  },
+};
 
 // async function getWaterLevelId(unique_id){
 //     const exist = await WaterLevel.exists({ unique_id: unique_id });
@@ -187,6 +244,5 @@ const WaterSettingController = {
 //     }
 //     return water_level_id;
 // }
-
 
 export default WaterSettingController;
