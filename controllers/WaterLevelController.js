@@ -1,6 +1,11 @@
 import fs from "fs";
 import { ObjectId } from "mongodb";
-import { WaterLevel, WaterSetting, WaterUsesDetails } from "../models/index.js";
+import {
+  WaterLevel,
+  WaterSetting,
+  WaterUse,
+  WaterUsesDetails,
+} from "../models/index.js";
 import CustomErrorHandler from "../services/CustomErrorHandler.js";
 import CustomSuccessHandler from "../services/CustomSuccessHandler.js";
 import CustomFunction from "../services/CustomFunction.js";
@@ -140,12 +145,18 @@ const WaterLevelController = {
         options
       );
 
-      // console.log('level--',level);
-      if (result.motor_status) {
+      if (result.motor_status == true) {
         WaterLevelController.calculateWaterUsage(
           level,
           req.params.unique_id,
-          water_level_id
+          water_level_id,
+          result.water_level
+        );
+      } else {
+        const temresult = await WaterLevel.findOneAndUpdate(
+          filter,
+          { last_water_level: result.water_level },
+          { new: true }
         );
       }
 
@@ -187,9 +198,9 @@ const WaterLevelController = {
 
     return res.send(CustomSuccessHandler.success(msg));
   },
-  //---------------------
 
-  calculateWaterUsage: async (level, uniqueId, water_level_id) => {
+
+  calculateWaterUsage: async (level, uniqueId, water_level_id, water_level) => {
     try {
       const year = CustomFunction.currentYearMonthDay("YYYY");
       const month = CustomFunction.currentYearMonthDay("MM");
@@ -202,57 +213,93 @@ const WaterLevelController = {
       const waterStartStopLevel = await WaterSetting.findOne({
         water_level_id: water_level_id,
       }).select("start_level stop_level");
-  
-      if (waterStartStopLevel.start_level>0 && waterStartStopLevel.stop_level>0) {
-        level =
-          waterStartStopLevel.stop_level - waterStartStopLevel.start_level;
-      } else {
-        level = default_stop_level - default_start_level;
-      }
 
-      const exist = await WaterUsesDetails.exists({
-        water_uses_id: water_level_id,
-        month: month,
-        year: year,
-        unique_id: uniqueId
-      });
-      if (!exist) {
-        const waterSchema = new WaterUsesDetails({
-          water_uses_id: water_level_id,
+      const waterUsageId = await WaterUse.exists();
+
+      if (waterUsageId) {
+        const waterLastOffLevel = await WaterLevel.findOne({
           unique_id: uniqueId,
-          year: year,
+        }).select("last_water_level");
+        if (
+          waterStartStopLevel.start_level >= 20 &&
+          waterStartStopLevel.stop_level <= 80
+        ) {
+          if (waterLastOffLevel.last_water_level != 0) {
+            level = waterLastOffLevel.last_water_level - water_level;
+          } else {
+            level = waterStartStopLevel.stop_level - water_level;
+          }
+        } else {
+          level = default_stop_level - default_start_level;
+        }
+        const exist = await WaterUsesDetails.exists({
+          water_uses_id: waterUsageId._id,
           month: month,
-          month_name: month_name,
-          waterUsage: [
-            {
-              level: level,
-            },
-          ],
+          year: year,
+          unique_id: uniqueId,
         });
-        const temp = await waterSchema.save();
-      } else {
-        const temp = await WaterUsesDetails.findByIdAndUpdate(
-          {
-            _id: exist._id,
-          },
-          {
-            $push: {
-              waterUsage: {
-                present_date: current_date,
-                in_time: current_time,
+
+        if (!exist) {
+          const waterSchema = new WaterUsesDetails({
+            water_uses_id: waterUsageId._id,
+            unique_id: uniqueId,
+            year: year,
+            month: month,
+            month_name: month_name,
+            // total_usage: level,
+            waterUsage: [
+              {
                 level: level,
               },
+            ],
+          });
+          const temp = await waterSchema.save();  
+        } else {
+          const temp = await WaterUsesDetails.findByIdAndUpdate(
+            {
+              _id: exist._id,
             },
-          },
-          { new: true }
-        );
+            {
+              $push: {
+                waterUsage: {
+                  present_date: current_date,
+                  in_time: current_time,
+                  level: level,
+                },
+              },
+            },
+            { new: true }
+          );
+        }
       }
     } catch (error) {
       console.log("error");
     }
   },
 
-  //---------------------
+  async totalUsage(req, res, next) {
+    try {
+      const tot_usage = await WaterUsesDetails.aggregate([
+        {
+          $match: { unique_id: req.params.unique_id },
+        },
+        { $unwind: "$waterUsage" },
+        {
+          $group: {
+            _id: 0,
+            
+            // _id: "$waterUsage.level",
+            total_usage: { $sum: "$waterUsage.level" },
+          },
+        },
+      ]);
+      const [{ _id: valueOfA, total_usage: valueOfB }] = tot_usage;
+
+      res.send({ status: 200, total_usage: valueOfB });
+    } catch (error) {
+      next(CustomErrorHandler.serverError());
+    }
+  },
 
   async updateLedStatus(req, res, next) {
     // const water_level_id = await getWaterLevelId(req.params.unique_id);

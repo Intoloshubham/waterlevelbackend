@@ -8,6 +8,7 @@ const waterLevelSchema = mongoose.Schema({
     sump_status:{ type: Boolean, default:false },
     bore_status:{ type: Boolean, default:false },
     water_level:{ type: String, default:null },
+    last_water_level:{type:Number,default:0},
     sump_level:{ type: String, default:null },
     ph_level:{ type: String, default:null },
 });

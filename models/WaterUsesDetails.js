@@ -8,10 +8,12 @@ const date=CustomFunction.currentDate();
 
 const waterUsesDetailsSchema = mongoose.Schema({
   water_uses_id: { type: ObjectId, required: true },
+  
   unique_id: { type: String, required: true },  
   year: { type:Number},
   month: { type: Number },
   month_name: { type: String },
+  total_usage:{type:Number,default:0},
   waterUsage:[{
       present_date:{type:String, default:date},
       in_time:{ type:String, default:time},
